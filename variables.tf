@@ -5,7 +5,7 @@ variable "github_app_pem_file" { default = null }
 variable "app_node_id" { default = null }
 
 variable "organization_name" {
-  default = "mageos-opentofu-test "
+  default = "mageos-opentofu-test"
 }
 
 variable "administrators" {
