@@ -515,5 +515,11 @@ variable "repositories" {
       teams       = ["infrastructure"]
       topics      = ["mage-os", "magento", "ecommerce", "magento2", "adobecommerce"]
     }
+
+    test-plan = {
+      description = "Test plan."
+      teams       = ["infrastructure"]
+      topics      = ["mage-os", "ecommerce", "magento2", "adobecommerce"]
+    },
   }
 }
