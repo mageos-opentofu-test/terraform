@@ -214,14 +214,16 @@ resource "github_repository_file" "codeowners_archived" {
   commit_author       = "davidtabat"
   commit_email        = "info@mage-os.org"
   overwrite_on_create = true
-
-  ignore_changes = [
-    "commit_author",
-    "commit_email",
-    "commit_message",
-    "content",
-    "branch"
-  ]
+  
+  lifecycle {
+    ignore_changes = [
+      "commit_author",
+      "commit_email",
+      "commit_message",
+      "content",
+      "branch"
+    ]
+  }
 }
 
 resource "github_repository_file" "merge-upstream-changes" {
