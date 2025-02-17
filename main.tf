@@ -176,7 +176,7 @@ resource "github_team_repository" "tech-lead" {
 }
 
 resource "github_repository_file" "codeowners" {
-  for_each   = { for k, v in var.repositories : k => v if lookup(v, "archived", false) == false }
+  for_each   = var.repositories
   repository = github_repository.repositories[each.key].name
   branch     = github_repository.repositories[each.key].default_branch
   file       = "CODEOWNERS"
