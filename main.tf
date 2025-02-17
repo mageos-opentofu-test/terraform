@@ -188,20 +188,26 @@ resource "github_repository_file" "codeowners" {
   commit_author       = "davidtabat"
   commit_email        = "info@mage-os.org"
   overwrite_on_create = true
+  
+  locals {
+    ignore_changes_list = {
+      for repo_name, repo in var.repositories :
+      repo_name => lookup(repo, "archived", false) ? [
+        "commit_author",
+        "commit_email",
+        "commit_message",
+        "content",
+        "branch"
+      ] : [
+        "commit_author",
+        "commit_email"
+      ]
+    }
+  }
 
   lifecycle {
-    ignore_changes = lookup(each.value, "archived", false) ? [
-      commit_author,
-      commit_email,
-      commit_message,
-      content,
-      branch
-    ] : [
-      commit_author,
-      commit_email
-    ]
+    ignore_changes = local.ignore_changes_list[each.key]
   }
-}
 
 resource "github_repository_file" "merge-upstream-changes" {
   for_each = {
