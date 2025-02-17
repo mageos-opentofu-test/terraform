@@ -190,15 +190,15 @@ resource "github_repository_file" "codeowners" {
   overwrite_on_create = true
 
   lifecycle {
-    ignore_changes = github_repository.repositories[each.key].archived ? [
+    ignore_changes = lookup(each.value, "archived", false) ? [
       commit_author,
       commit_email,
-      commit_message,  # Ignore all changes for archived repos to avoid errors
+      commit_message,
       content,
       branch
     ] : [
       commit_author,
-      commit_email,  # Ignore commit_author and commit_email for non-archived repos
+      commit_email
     ]
   }
 }
