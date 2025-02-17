@@ -179,7 +179,8 @@ resource "github_repository_file" "codeowners" {
   for_each = {
     for k, v in var.repositories : k => v
     if !github_repository.repositories[k].archived
-  }  repository = github_repository.repositories[each.key].name
+  }
+  repository = github_repository.repositories[each.key].name
   branch     = github_repository.repositories[each.key].default_branch
   file       = "CODEOWNERS"
   content = "* ${join(
