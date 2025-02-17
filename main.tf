@@ -176,8 +176,10 @@ resource "github_team_repository" "tech-lead" {
 }
 
 resource "github_repository_file" "codeowners" {
-  for_each   = { for k, v in var.repositories : k => v if lookup(v, "archived", false) == false }
-  repository = github_repository.repositories[each.key].name
+  for_each = {
+    for k, v in var.repositories : k => v
+    if !github_repository.repositories[k].archived
+  }  repository = github_repository.repositories[each.key].name
   branch     = github_repository.repositories[each.key].default_branch
   file       = "CODEOWNERS"
   content = "* ${join(
@@ -193,35 +195,6 @@ resource "github_repository_file" "codeowners" {
     ignore_changes = [
       commit_author,
       commit_email,
-    ]
-  }
-}
-
-
-resource "github_repository_file" "codeowners_archived" {
-  for_each = {
-    for k, v in var.repositories : k => v if lookup(v, "archived", false)
-  }
-
-  repository = github_repository.repositories[each.key].name
-  branch     = github_repository.repositories[each.key].default_branch
-  file       = "CODEOWNERS"
-  content    = "* ${join(
-    " ",
-    formatlist("@${var.organization_name}/%s", try(each.value.teams, []))
-  )}"
-  commit_message      = "Managed by OpenTofu"
-  commit_author       = "davidtabat"
-  commit_email        = "info@mage-os.org"
-  overwrite_on_create = true
-  
-  lifecycle {
-    ignore_changes = [
-      "commit_author",
-      "commit_email",
-      "commit_message",
-      "content",
-      "branch"
     ]
   }
 }
