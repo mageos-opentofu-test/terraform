@@ -176,7 +176,7 @@ resource "github_team_repository" "tech-lead" {
 }
 
 resource "github_repository_file" "codeowners" {
-  for_each   = var.repositories
+  for_each   = { for k, v in var.repositories : k => v if lookup(v, "archived", false) == false }
   repository = github_repository.repositories[each.key].name
   branch     = github_repository.repositories[each.key].default_branch
   file       = "CODEOWNERS"
@@ -188,26 +188,41 @@ resource "github_repository_file" "codeowners" {
   commit_author       = "davidtabat"
   commit_email        = "info@mage-os.org"
   overwrite_on_create = true
-  
-  locals {
-    ignore_changes_list = {
-      for repo_name, repo in var.repositories :
-      repo_name => lookup(repo, "archived", false) ? [
-        "commit_author",
-        "commit_email",
-        "commit_message",
-        "content",
-        "branch"
-      ] : [
-        "commit_author",
-        "commit_email"
-      ]
-    }
-  }
 
   lifecycle {
-    ignore_changes = local.ignore_changes_list[each.key]
+    ignore_changes = [
+      commit_author,
+      commit_email,
+    ]
   }
+}
+
+
+resource "github_repository_file" "codeowners_archived" {
+  for_each = {
+    for k, v in var.repositories : k => v if lookup(v, "archived", false)
+  }
+
+  repository = github_repository.repositories[each.key].name
+  branch     = github_repository.repositories[each.key].default_branch
+  file       = "CODEOWNERS"
+  content    = "* ${join(
+    " ",
+    formatlist("@${var.organization_name}/%s", try(each.value.teams, []))
+  )}"
+  commit_message      = "Managed by OpenTofu"
+  commit_author       = "davidtabat"
+  commit_email        = "info@mage-os.org"
+  overwrite_on_create = true
+
+  ignore_changes = [
+    "commit_author",
+    "commit_email",
+    "commit_message",
+    "content",
+    "branch"
+  ]
+}
 
 resource "github_repository_file" "merge-upstream-changes" {
   for_each = {
